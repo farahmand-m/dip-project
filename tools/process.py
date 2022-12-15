@@ -58,16 +58,21 @@ def extract_images(filepath, output_dir, target_width, skip_frames, quality):
 
     video.release()
 
-    return ratio
+    return num_frames, ratio
 
 
-def parse_annotations(filepath, output_dir, scale_ratio):
+def parse_annotations(filepath, output_dir, num_frames, scale_ratio):
 
     os.makedirs(output_dir, exist_ok=True)
 
     with open(filepath, 'r') as stream:
         contents = stream.read()
     annotations = ElementTree.fromstring(contents)
+
+    element = annotations
+    for tag in ('meta', 'task', 'segments', 'segment', 'stop'):
+        element = element.find(tag)
+    num_ann_frames = int(element.text)
 
     count = 0
 
@@ -79,7 +84,7 @@ def parse_annotations(filepath, output_dir, scale_ratio):
                 for child in element:
                     if child.tag == 'box':
                         attributes = child.attrib
-                        frame_no = int(attributes['frame']) + 1
+                        frame_no = int(attributes['frame']) + (num_frames - num_ann_frames)
                         left, top = float(attributes['xtl']), float(attributes['ytl'])
                         right, bottom = float(attributes['xbr']), float(attributes['ybr'])
                         assert right > left and bottom > top, 'Invalid Bounding Box'
@@ -97,7 +102,7 @@ def parse_annotations(filepath, output_dir, scale_ratio):
             else:
                 print(f'  * skipping "{element.tag}" in annotations')
 
-    return count
+    return track_id, count
 
 
 if __name__ == '__main__':
@@ -125,9 +130,9 @@ if __name__ == '__main__':
             images_dir = output_dir / 'images'
             ann_dir = output_dir / 'gt'
             if video_path.exists():
-                ratio = extract_images(video_path, images_dir, args.max_width, args.skip_frames, args.quality)
+                num_frames, ratio = extract_images(video_path, images_dir, args.max_width, args.skip_frames, args.quality)
                 if ann_path.exists():
-                    count = parse_annotations(ann_path, ann_dir, ratio)
-                    print('* Extracted', count, 'bounding boxes.')
+                    track_count, box_count = parse_annotations(ann_path, ann_dir, num_frames, ratio)
+                    print('* Extracted', box_count, 'bounding boxes, associated with', track_count, 'tracks.')
                 else:
                     print('* Missing annotations.')
