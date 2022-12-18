@@ -36,8 +36,12 @@ def pairs_to_crops(pairs, target_size):
     for filepath, bounding_box in pairs:
         image = tf.io.read_file(filepath)
         image = tf.image.decode_jpeg(image, channels=3)
+        im_height, im_width, channels = image.shape
         left, top, width, height = bounding_box
-        top = max(top, 0)  # In a few cases, top was negative.
+        left = np.clip(left, 0, im_width)
+        top = np.clip(top, 0, im_height)
+        width -= left + width - np.clip(left + width, 0, im_width)
+        height -= top + height - np.clip(top + height, 0, im_height)
         image = tf.image.crop_to_bounding_box(image, top, left, height, width)
         image = tf.image.convert_image_dtype(image, tf.float32)
         image = tf.image.resize(image, target_size)
