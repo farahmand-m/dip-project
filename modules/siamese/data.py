@@ -42,6 +42,12 @@ def pairs_to_crops(pairs, target_size):
         top = np.clip(top, 0, im_height)
         width -= left + width - np.clip(left + width, 0, im_width)
         height -= top + height - np.clip(top + height, 0, im_height)
+        if width == 0:
+            left -= 1
+            width += 1
+        if height == 0:
+            top -= 1
+            height += 1
         image = tf.image.crop_to_bounding_box(image, top, left, height, width)
         image = tf.image.convert_image_dtype(image, tf.float32)
         image = tf.image.resize(image, target_size)
