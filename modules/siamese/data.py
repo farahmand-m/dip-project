@@ -38,8 +38,8 @@ def pairs_to_crops(pairs, target_size):
         image = tf.image.decode_jpeg(image, channels=3)
         im_height, im_width, channels = image.shape
         left, top, width, height = bounding_box
-        left = np.clip(left, 0, im_width)
-        top = np.clip(top, 0, im_height)
+        left = np.clip(left, 1, im_width - 1)
+        top = np.clip(top, 1, im_height - 1)
         width -= left + width - np.clip(left + width, 0, im_width)
         height -= top + height - np.clip(top + height, 0, im_height)
         if width == 0:
