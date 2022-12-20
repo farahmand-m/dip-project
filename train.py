@@ -56,9 +56,10 @@ if __name__ == '__main__':
                   callbacks=[checkpoint])
         randomly_initialized = False
 
-    # if os.path.exists(checkpoint_path):
-    #     model.load_weights(checkpoint_path)
-    #     randomly_initialized = False
+    if os.path.exists(checkpoint_path):
+        model.build(im_size=args.im_size)
+        model.load_weights(checkpoint_path)
+        randomly_initialized = False
 
     if randomly_initialized:
         print('You must either train the model or have a checkpoint.', file=sys.stderr)

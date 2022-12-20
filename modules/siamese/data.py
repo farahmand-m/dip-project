@@ -5,7 +5,6 @@ import functools
 
 import numpy as np
 import tensorflow as tf
-import scipy.stats as stats
 import tqdm.auto as tqdm
 
 from modules.common import load_dataset
@@ -79,9 +78,10 @@ def load_data(args):
     num_train_samples, train_set = process(train_set, args)
     num_eval_samples, eval_set = process(eval_set, args)
     train_set, eval_set = tf.data.Dataset.zip(train_set), tf.data.Dataset.zip(eval_set)
+    train_set, eval_set = train_set.repeat(), eval_set.repeat()
     train_set = train_set.shuffle(args.batch_size * 4, seed=args.seed, reshuffle_each_iteration=True)
     train_set, eval_set = train_set.batch(args.batch_size), eval_set.batch(args.batch_size)
     train_steps = np.ceil(num_train_samples / args.batch_size)
     eval_steps = np.ceil(num_eval_samples / args.batch_size)
-    train_set, eval_set = train_set.prefetch(1), eval_set.prefetch(1)
+    train_set, eval_set = train_set.prefetch(4), eval_set.prefetch(4)
     return (train_steps, train_set), (eval_steps, eval_set)

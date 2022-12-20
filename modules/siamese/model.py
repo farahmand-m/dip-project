@@ -1,8 +1,9 @@
 # The implementation below is based on the following tutorial:
 # https://keras.io/examples/vision/siamese_network
+
 import numpy as np
-import tensorflow as tf
 import scipy.spatial.distance as distance
+import tensorflow as tf
 
 
 class DistanceLayer(tf.keras.layers.Layer):
@@ -77,6 +78,10 @@ class SiameseModel(tf.keras.models.Model):
 
         self.loss_tracker = tf.keras.metrics.Mean(name='loss')
 
+    def build(self, im_size):
+        triplet_shape = [(None, *im_size, 3)] * 3
+        super().build(input_shape=triplet_shape)
+
     def call(self, inputs, training=False, **kwargs):
         # To simplify the implementation of the loss function, we can use the `distances` network here.
         return self.distances(inputs)
@@ -142,7 +147,7 @@ def create_model(args):
     return model
 
 
-def evaluate_model(model, subset, steps, margin=1):
+def evaluate_model(model, subset, steps):
     anchors_embed, positives_embed, negatives_embed = model.predict(subset, steps=steps, verbose=1)
 
     print('Accuracy:')
