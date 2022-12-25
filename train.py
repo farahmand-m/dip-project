@@ -5,7 +5,7 @@ import sys
 
 import tensorflow as tf
 
-from modules import siamese
+from modules import siamese, yolo
 
 if __name__ == '__main__':
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('--eval-steps', type=int, default=None, help='maximum number of evaluation steps')
     parser.add_argument('--use-test', action='store_true', help='weather to use the "test" subset for eval')
     parser.add_argument('--eval-only', action='store_true', help='only perform evaluation using stored weights')
-    trainable_modules = {'siamese': siamese}
+    trainable_modules = {'siamese': siamese, 'yolo': yolo}
 
     subparsers = parser.add_subparsers(dest='module')
     for label, module in trainable_modules.items():
